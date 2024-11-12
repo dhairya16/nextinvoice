@@ -16,6 +16,15 @@ import {AVAILABLE_STATUSES} from "@/data/invoices";
 import {updateStatusAction, deleteInvoiceAction} from "@/app/actions";
 import {ChevronDown, Ellipsis, Trash2} from "lucide-react";
 import {Invoices} from "@/db/schema";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription, DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+
 
 interface InvoiceProps {
   invoice: typeof Invoices.$inferSelect,
@@ -84,25 +93,44 @@ export default function Invoice({invoice}: InvoiceProps) {
                 }
               </DropdownMenuContent>
             </DropdownMenu>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button className='flex items-center gap-2' variant='outline'>
-                  <span className='sr-only'>More Options</span>
-                  <Ellipsis className='w-4 h-auto'/>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem>
-                  <form action={deleteInvoiceAction}>
-                    <input type="hidden" name='id' value={invoice.id}/>
-                    <button className='flex items-center gap-2'>
-                      <Trash2 className='w-4 h-auto' color='red'/>
-                      Delete Invoice
-                    </button>
-                  </form>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+
+            <Dialog>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className='flex items-center gap-2' variant='outline'>
+                    <span className='sr-only'>More Options</span>
+                    <Ellipsis className='w-4 h-auto'/>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem>
+                    <DialogTrigger asChild>
+                      <button className='flex items-center gap-2'>
+                        <Trash2 className='w-4 h-auto' color='red'/>
+                        Delete Invoice
+                      </button>
+                    </DialogTrigger>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Delete Invoice</DialogTitle>
+                  <DialogDescription>
+                    This action cannot be undone. This will permanently delete your invoice.
+                  </DialogDescription>
+                  <DialogFooter>
+                    <form action={deleteInvoiceAction}>
+                      <input type="hidden" name='id' value={invoice.id}/>
+                      <Button variant='destructive' className='flex items-center gap-2'>
+                        <Trash2 className='w-4 h-auto' color='white'/>
+                        Delete Invoice
+                      </Button>
+                    </form>
+                  </DialogFooter>
+                </DialogHeader>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 
