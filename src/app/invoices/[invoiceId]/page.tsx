@@ -1,5 +1,5 @@
 import {db} from "@/db";
-import {Invoices} from "@/db/schema";
+import {Invoices, Customers} from "@/db/schema";
 import {and, eq} from "drizzle-orm";
 // import {Badge} from "@/components/ui/badge";
 // import {cn} from "@/lib/utils";
@@ -32,6 +32,7 @@ export default async function InvoicePage({params}: { params: { invoiceId: strin
 
   const [result] = await db.select()
     .from(Invoices)
+    .innerJoin(Customers, eq(Invoices.customerId, Customers.id))
     .where(
       and(
         eq(Invoices.id, invoiceId),
@@ -40,9 +41,16 @@ export default async function InvoicePage({params}: { params: { invoiceId: strin
     )
     .limit(1)
 
+  console.log('res -->', result);
+
   if (!result) {
     notFound()
   }
 
-  return <Invoice invoice={result}/>
+  const invoice = {
+    ...result.invoices,
+    customer: result.customers,
+  }
+
+  return <Invoice invoice={invoice}/>
 }

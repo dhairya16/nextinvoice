@@ -14,7 +14,7 @@ import {Button} from "@/components/ui/button";
 import Link from "next/link";
 
 import {db} from "@/db";
-import {Invoices} from "@/db/schema";
+import {Customers, Invoices} from "@/db/schema";
 import {cn} from "@/lib/utils";
 import Container from "@/components/Container";
 import {eq} from "drizzle-orm";
@@ -25,8 +25,17 @@ export default async function Home() {
   if (!userId) return;
 
   const results = await db.select()
-    .from(Invoices).where(eq(Invoices.userId, userId));
+    .from(Invoices)
+    .innerJoin(Customers, eq(Invoices.customerId, Customers.id))
+    .where(eq(Invoices.userId, userId));
   // console.log('results =>', results)
+
+  const invoices = results.map(({invoices, customers}) => {
+    return {
+      ...invoices,
+      customer: customers,
+    }
+  });
 
   return (
     <main className="h-full">
@@ -65,7 +74,7 @@ export default async function Home() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {results.map((result) => (
+            {invoices.map((result) => (
               <TableRow key={result.id}>
                 <TableCell className="text-left font-medium p-0">
                   <Link href={`invoices/${result.id}`} className="font-semibold p-3 block">
@@ -74,12 +83,12 @@ export default async function Home() {
                 </TableCell>
                 <TableCell className="text-left p-0">
                   <Link href={`invoices/${result.id}`} className="font-semibold p-3 block">
-                    John Doe
+                    {result.customer.name}
                   </Link>
                 </TableCell>
                 <TableCell className="text-left p-0">
                   <Link href={`invoices/${result.id}`} className="p-3 block">
-                    johndoe@example.com
+                    {result.customer.email}
                   </Link>
                 </TableCell>
                 <TableCell className="text-center p-0">
