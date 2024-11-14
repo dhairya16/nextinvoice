@@ -19,14 +19,17 @@ import {auth} from "@clerk/nextjs/server";
 // import {ChevronDown} from "lucide-react";
 import Invoice from "@/app/invoices/[invoiceId]/Invoice";
 
+type Params = Promise<{ invoiceId: string }>;
 
-export default async function InvoicePage({params}: { params: { invoiceId: string } }) {
+export default async function InvoicePage({params}: { params: Params }) {
   const {userId} = await auth();
   if (!userId) return;
 
-  const invoiceId = parseInt(params.invoiceId);
+  const {invoiceId} = await params;
 
-  if (isNaN(invoiceId)) {
+  const id = parseInt(invoiceId);
+
+  if (isNaN(id)) {
     throw new Error('Invalid invoiceId');
   }
 
@@ -35,13 +38,11 @@ export default async function InvoicePage({params}: { params: { invoiceId: strin
     .innerJoin(Customers, eq(Invoices.customerId, Customers.id))
     .where(
       and(
-        eq(Invoices.id, invoiceId),
+        eq(Invoices.id, id),
         eq(Invoices.userId, userId),
       )
     )
     .limit(1)
-
-  console.log('res -->', result);
 
   if (!result) {
     notFound()
